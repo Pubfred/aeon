@@ -458,7 +458,7 @@ void minethd::work_main()
 void minethd::double_work_main()
 {
 	// remember to also change in crypto/cryptonight_aesni.h
-	static const int hashes = 6;
+	static const int hashes = 4;
 	cryptonight_ctx* ctx[hashes];
 	uint64_t iCount = 0;
 	uint64_t *piHashVal[hashes];
