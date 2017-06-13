@@ -340,7 +340,7 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 template<size_t ITERATIONS, size_t MEM, bool PREFETCH, bool SOFT_AES>
 void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
 {
-	static const int hashes = 6;
+	static const int hashes = 4;
 	for(int i = 0; i<hashes; i++){
 		keccak((const uint8_t *)input+(i*len), len, ctx[i]->hash_state, 200);
 		cn_explode_scratchpad<MEM, SOFT_AES>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state);
