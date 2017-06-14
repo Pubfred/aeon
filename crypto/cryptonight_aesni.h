@@ -352,52 +352,62 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	__m128i  bx[hashes], cx[hashes];
 	uint64_t hi, lo , cl, ch;
 	
-	for(int i = 0; i<hashes; i++){
-		l[i] = ctx[i]->long_state;
-		h[i] = (uint64_t*)ctx[i]->hash_state;
-		axl[i] =  h[i][0] ^ h[i][4];
-		axh[i] =  h[i][1] ^ h[i][5];
-		bx[i] = _mm_set_epi64x(h[i][3] ^ h[i][7], h[i][2] ^ h[i][6]);
-		idx[i] = h[i][0] ^ h[i][4];
-		//cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-	}
+	  for(int i = 0; i<hashes; i++){
+                l[i] = ctx[i]->long_state;
+                h[i] = (uint64_t*)ctx[i]->hash_state;
+                axl[i] =  h[i][0] ^ h[i][4];
+                axh[i] =  h[i][1] ^ h[i][5];
+                bx[i] = _mm_set_epi64x(h[i][3] ^ h[i][7], h[i][2] ^ h[i][6]);
+                idx[i] = h[i][0] ^ h[i][4];
+        }
+
 
 	// Optim - 90% time boundary
 	for (size_t x = 0; x < ITERATIONS; x++)
 	{
-		for(int i = 0; i<hashes; i++){
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-			cx[i] = _mm_aesenc_si128(cx[i], _mm_set_epi64x(axh[i],axl[i]);
-			_mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
-			idx[i] = _mm_cvtsi128_si64(cx[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
-			bx[i] = cx[i];
-			++i;
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-			cx[i] = _mm_aesenc_si128(cx[i], _mm_set_epi64x(axh[i],axl[i] );
-			_mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
-			idx[i] = _mm_cvtsi128_si64(cx[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
-			bx[i] = cx[i];
-		}
-		for(int i = 0; i<hashes; i++){
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
-			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
-			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
-			ax[i] = _mm_xor_si128(ax[i], cx[i]);
-			idx[i] = _mm_cvtsi128_si64(ax[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
-			++i;
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
-			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
-			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
-			ax[i] = _mm_xor_si128(ax[i], cx[i]);
-			idx[i] = _mm_cvtsi128_si64(ax[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
-		}
+		 for(int i = 0; i<hashes; i++){
+                        cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+                        cx[i] = _mm_aesenc_si128(cx[i], _mm_set_epi64x(axh[i],axl[i]));
+                        _mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
+                        idx[i] = _mm_cvtsi128_si64(cx[i]);
+                        _mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+                        bx[i] = cx[i];
+                        ++i;
+                        cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+                        cx[i] = _mm_aesenc_si128(cx[i], _mm_set_epi64x(axh[i],axl[i]) );
+                        _mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
+                        idx[i] = _mm_cvtsi128_si64(cx[i]);
+                        _mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+                        bx[i] = cx[i];
+                }
 
+	
+						 
+                for(int i = 0; i<hashes; i++){
+                        cl = ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[0];
+                        ch = ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[1];
+                        lo = _umul128(idx[i], cl, &hi);
+                        axl[i] += hi;
+                        axh[i] += lo;
+                        ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[0]=  axl[i];
+                        ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[1]=  axh[i];
+                        axh[i] ^= ch;
+                        axl[i] ^= cl;
+                        idx[i] =  axl[i] ;
+                        _mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+                        ++i;
+                        cl = ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[0];
+                        ch = ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[1];
+                        lo = _umul128(idx[i], cl, &hi);
+                        axl[i] += hi;
+                        axh[i] += lo;
+                        ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[0]=  axl[i];
+                        ((uint64_t*) &l[i][idx[i] & 0xFFFF0])[1]=  axh[i];
+                        axh[i] ^= ch;
+                        axl[i] ^= cl;
+                        idx[i] =  axl[i] ;
+                        _mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+                }
 	}
 
 	// Optim - 90% time boundary
