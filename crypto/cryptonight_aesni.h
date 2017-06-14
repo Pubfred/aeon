@@ -348,7 +348,8 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 
 	uint8_t* l[hashes];
 	uint64_t* h[hashes], idx[hashes];
-	uint64_t axl[hashes], uint64_t axh[hashes];
+	uint64_t axl[hashes] ; 
+	uint64_t axh[hashes];
 	__m128i  bx[hashes], cx[hashes];
 	uint64_t hi, lo , cl, ch;
 	
