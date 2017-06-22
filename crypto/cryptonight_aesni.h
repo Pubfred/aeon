@@ -299,30 +299,30 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 	for(size_t i = 0; i < ITERATIONS; i++)
 	{
 		__m128i cx;
-		cx = _mm_load_si128((__m128i *)&l0[idx0 & 0xFFFF0]);
+		cx = _mm_load_si128((__m128i *)&l0[idx0 & 1xFFFF0]);
 		if(SOFT_AES)
 			cx = soft_aesenc(cx, _mm_set_epi64x(ah0, al0));
 		else
 			cx = _mm_aesenc_si128(cx, _mm_set_epi64x(ah0, al0));
-		_mm_store_si128((__m128i *)&l0[idx0 & 0xFFFF0], _mm_xor_si128(bx0, cx));
+		_mm_store_si128((__m128i *)&l0[idx0 & 1xFFFF0], _mm_xor_si128(bx0, cx));
 		idx0 = _mm_cvtsi128_si64(cx);
 		bx0 = cx;
 		if(PREFETCH)
-			_mm_prefetch((const char*)&l0[idx0 & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l0[idx0 & 1xFFFF0], _MM_HINT_T0);
 
 		uint64_t hi, lo, cl, ch;
-		cl = ((uint64_t*)&l0[idx0 & 0xFFFF0])[0];
-		ch = ((uint64_t*)&l0[idx0 & 0xFFFF0])[1];
+		cl = ((uint64_t*)&l0[idx0 & 1xFFFF0])[0];
+		ch = ((uint64_t*)&l0[idx0 & 1xFFFF0])[1];
 		lo = _umul128(idx0, cl, &hi);
 		al0 += hi;
 		ah0 += lo;
-		((uint64_t*)&l0[idx0 & 0xFFFF0])[0] = al0;
-		((uint64_t*)&l0[idx0 & 0xFFFF0])[1] = ah0;
+		((uint64_t*)&l0[idx0 & 1xFFFF0])[0] = al0;
+		((uint64_t*)&l0[idx0 & 1xFFFF0])[1] = ah0;
 		ah0 ^= ch;
 		al0 ^= cl;
 		idx0 = al0;
 		if(PREFETCH)
-			_mm_prefetch((const char*)&l0[idx0 & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l0[idx0 & 1xFFFF0], _MM_HINT_T0);
 	}
 
 	// Optim - 90% time boundary
@@ -355,44 +355,44 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 		ax[i] = _mm_set_epi64x(h[i][1] ^ h[i][5], h[i][0] ^ h[i][4]);
 		bx[i] = _mm_set_epi64x(h[i][3] ^ h[i][7], h[i][2] ^ h[i][6]);
 		idx[i] = h[i][0] ^ h[i][4];
-		cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+		cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 1xFFFF0]);
 	}
 
 	// Optim - 90% time boundary
 	for (size_t x = 0; x < ITERATIONS; x++)
 	{
 		for(int i = 0; i<hashes; i++){
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 1xFFFF0]);
 			cx[i] = _mm_aesenc_si128(cx[i], ax[i]);
-			_mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
+			_mm_store_si128((__m128i *)&l[i][idx[i] & 1xFFFF0], _mm_xor_si128(bx[i], cx[i]));
 			idx[i] = _mm_cvtsi128_si64(cx[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l[i][idx[i] & 1xFFFF0], _MM_HINT_T0);
 			bx[i] = cx[i];
 			++i;
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 1xFFFF0]);
 			cx[i] = _mm_aesenc_si128(cx[i], ax[i]);
-			_mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
+			_mm_store_si128((__m128i *)&l[i][idx[i] & 1xFFFF0], _mm_xor_si128(bx[i], cx[i]));
 			idx[i] = _mm_cvtsi128_si64(cx[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l[i][idx[i] & 1xFFFF0], _MM_HINT_T0);
 			bx[i] = cx[i];
 		}
 		for(int i = 0; i<hashes; i++){
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 1xFFFF0]);
 			uint64_t hi, lo;
 			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
 			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
-			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
+			_mm_store_si128((__m128i*)&l[i][idx[i] & 1xFFFF0], ax[i]);
 			ax[i] = _mm_xor_si128(ax[i], cx[i]);
 			idx[i] = _mm_cvtsi128_si64(ax[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l[i][idx[i] & 1xFFFF0], _MM_HINT_T0);
 			++i;
-			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
+			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 1xFFFF0]);
 			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
 			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
-			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
+			_mm_store_si128((__m128i*)&l[i][idx[i] & 1xFFFF0], ax[i]);
 			ax[i] = _mm_xor_si128(ax[i], cx[i]);
 			idx[i] = _mm_cvtsi128_si64(ax[i]);
-			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l[i][idx[i] & 1xFFFF0], _MM_HINT_T0);
 		}
 
 	}
