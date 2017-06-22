@@ -464,7 +464,7 @@ void minethd::double_work_main()
 	uint64_t *piHashVal[hashes];
 	uint32_t *piNonce[hashes];
 	uint8_t bDoubleHashOut[32*hashes];
-	uint8_t	bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * 5];
+	uint8_t	bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * hashes];
 	uint32_t iNonce;
 	job_result res;
 
