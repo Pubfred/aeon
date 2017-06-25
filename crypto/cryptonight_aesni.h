@@ -349,13 +349,14 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	uint8_t* l[hashes];
 	uint64_t* h[hashes], idx[hashes];
 	__m128i ax[hashes], bx[hashes], cx[hashes];
+	uint64_t hi, lo;
 	for(int i = 0; i<hashes; i++){
 		l[i] = ctx[i]->long_state;
 		h[i] = (uint64_t*)ctx[i]->hash_state;
 		ax[i] = _mm_set_epi64x(h[i][1] ^ h[i][5], h[i][0] ^ h[i][4]);
 		bx[i] = _mm_set_epi64x(h[i][3] ^ h[i][7], h[i][2] ^ h[i][6]);
 		idx[i] = h[i][0] ^ h[i][4];
-		cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0x1FFFF0]);
+		
 	}
 
 	// Optim - 90% time boundary
@@ -378,7 +379,7 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 		}
 		for(int i = 0; i<hashes; i++){
 			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0x1FFFF0]);
-			uint64_t hi, lo;
+			
 			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
 			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
 			_mm_store_si128((__m128i*)&l[i][idx[i] & 0x1FFFF0], ax[i]);
