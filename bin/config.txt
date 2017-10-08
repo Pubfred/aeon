@@ -98,7 +98,7 @@
  * pool_password  - Can be empty in most cases or "x".
  */
 "pool_address" : "mine.aeon-pool.com:5555",
-"wallet_address" : "WmtVCy5FunFbMDUh9NeozuhXKqVP6KbS17ntNg4ouqdd5e45SezMQCE71MpfPsx15Vc24wxsa3jGM1X2Qf3BCpQo1xqqmhY5z.3000",
+"wallet_address" : "WmtVCy5FunFbMDUh9NeozuhXKqVP6KbS17ntNg4ouqdd5e45SezMQCE71MpfPsx15Vc24wxsa3jGM1X2Qf3BCpQo1xqqmhY5z",
 "pool_password" : "x",
 
 /*
